@@ -59,6 +59,7 @@ calculate_track <- function(
 
         ##################################
         reduced_rec_df <- subset.data.frame(rec_df, rec_df$filtered_rssi >= rssi_coefs[1])
+        # print(paste('reduced rec df', reduced_rec_df))
         node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
 
         multilat_fit <- nls(reduced_rec_df$exp_dist ~ haversine(reduced_rec_df$lat,reduced_rec_df$lon,ml_lat,ml_lon),
@@ -67,7 +68,7 @@ calculate_track <- function(
                       control=nls.control(warnOnly = T, minFactor=1/65536, maxiter = 100)
                     )
 
-        print(multilat_fit)
+        print(paste('multilat fit', multilat_fit))
         co <- coef(summary(multilat_fit))
         ##################################
 

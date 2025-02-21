@@ -20,6 +20,7 @@ calc_rssi_v_dist <- function(node_locs, sidekick_tag_df, detection_df, use_sync 
                 matching_beeps,
                 matching_beeps$Sync == sidekick_beep$sync
             )
+            # print(matching_beeps)
         }
         lower_time_limit <- sidekick_beep$time_utc - time_window
         upper_time_limit <- sidekick_beep$time_utc + time_window
@@ -27,6 +28,8 @@ calc_rssi_v_dist <- function(node_locs, sidekick_tag_df, detection_df, use_sync 
             matching_beeps,
             matching_beeps$time >= lower_time_limit & matching_beeps$time <= upper_time_limit
         )
+        # print(matching_beeps)
+        
         if (nrow(matching_beeps) > 0) {
             for (i in 1:nrow(matching_beeps)) {
                 beep <- matching_beeps[i, ]
