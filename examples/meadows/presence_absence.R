@@ -17,10 +17,10 @@ source("R/functions/tag/tag_functions.R")
 ##  SPECIFY PARAMETERS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to your database file
-database_file <- "~/development/aos_test/data/meadows.duckdb"
+database_file <- "./data/meadows.db"
 
 # Specify the path to the deployment info file
-deployment_info_file <- "data/meadows/meadows_deployments_2023.csv"
+deployment_info_file <- "data/meadows_deployments_2023.csv"
 
 # Specify the time range of node data you want to import for this analysis
 start_time <- as.POSIXct("2023-08-01 00:00:00", tz = "GMT")
@@ -30,7 +30,9 @@ stop_time <- as.POSIXct("2023-12-31 00:00:00", tz = "GMT")
 ##  1.) LOAD STATION TAG DETECTION DATA
 ## -----------------------------------------------------------------------------
 # Load from DB
-con <- DBI::dbConnect(duckdb::duckdb(), dbdir = database_file, read_only = TRUE)
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      dbdir = database_file, 
+                      read_only = TRUE)
 detection_df <- tbl(con, "raw") |> 
   filter(time >= start_time & time <= stop_time) |>
   collect()

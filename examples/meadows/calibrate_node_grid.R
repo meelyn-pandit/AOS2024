@@ -19,12 +19,13 @@ source("R/functions/calibration/calibration_functions.R")
 ##  SPECIFY PARAMETERS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to the sidekick data file you recorded for calibration
-sidekick_file_path <- "data/meadows/sidekick/calibration_2023_8_3_all.csv"
+sidekick_file_path <- "data/sidekick/calibration_2023_8_3_all.csv"
 # Specify the path to your database file
-database_file <- "~/development/aos_test/data/meadows.duckdb"
+database_file <- "./data/meadows.db"
 
 # Specify the tag ID that you used in your calibration
 my_tag_id <- "072A6633"
+# my_tag_id <- "614B661E"
 
 # Specify the time range of node data you want to import for this analysis
 #   This range should cover a large time window where you nodes were in
@@ -36,7 +37,7 @@ stop_time <- as.POSIXct("2023-08-07 00:00:00", tz = "GMT")
 # Specify a list of node Ids if you only want to include a subset in calibration
 # IF you want to use all nodes, ignore this line and SKIP the step below
 # where the data frame is trimmed to only nodes in this list
-# my_nodes <- c("B25AC19E", "44F8E426", "FAB6E12", "1EE02113", "565AA5B9", "EE799439", "1E762CF3", "A837A3F4", "484ED33B")
+my_nodes <- c("B25AC19E", "44F8E426", "FAB6E12", "1EE02113", "565AA5B9", "EE799439", "1E762CF3", "A837A3F4", "484ED33B")
 
 # You can specify an alternative map tile URL to use here
 my_tile_url <- "https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
@@ -47,7 +48,9 @@ my_tile_url <- "https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
 ##  1.) LOAD NODE HEALTH DATA FROM FILES
 ## -----------------------------------------------------------------------------
 # Load from DB
-con <- DBI::dbConnect(duckdb::duckdb(), dbdir = database_file, read_only = TRUE)
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      dbdir = database_file, 
+                      read_only = TRUE)
 node_health_df <- tbl(con, "node_health") |> 
   filter(time >= start_time & time <= stop_time) |>
   collect()
@@ -93,6 +96,8 @@ sidekick_tag_df <- subset.data.frame(sidekick_all_df, tag_id == my_tag_id)
 # Show location of all beeps in relation to node locations
 calibration_map <- map_calibration_track(node_locs, sidekick_tag_df, tile_url = my_tile_url)
 calibration_map
+
+## ALTERNATIVE TO SIDEKICK: csv with tag id, location, and time, keep the use_sync set to FALSE
 
 ## -----------------------------------------------------------------------------
 ##  5.) CALCULATE THE RSSI VS DISTANCE RELATIONSHIP

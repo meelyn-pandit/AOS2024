@@ -1,4 +1,9 @@
-build_grid <- function(node_locs, center_lat, center_lon, x_size_meters, y_size_meters, bin_size) {
+build_grid <- function(node_locs, 
+                       center_lat, 
+                       center_lon, 
+                       x_size_meters, 
+                       y_size_meters, 
+                       bin_size) {
     get_delta_lat <- function(lat, dist) {
         pi <- 3.1415926535897932
         earth_radius <- 6371.0e3 # meters

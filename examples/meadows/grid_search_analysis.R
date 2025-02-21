@@ -22,7 +22,7 @@ source("R/functions/grid_search/grid_search_functions.R")
 ## -----------------------------------------------------------------------------
 # Specify the path to your database file
 #database_file <- "~/development/aos_test/data/meadows.duckdb"
-database_file <- "~/Desktop/full_data/meadows.duckdb"
+database_file <- "data/meadows_test.duckdb"
 
 # (OPTIONAL) Specify Node time offsets if necessary
 node_time_offset_file <- "data/meadows/node_time_offset_8_2_2023.csv"

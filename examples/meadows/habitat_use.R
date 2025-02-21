@@ -17,9 +17,9 @@ source("R/functions/grid_search/grid_search_functions.R")
 ##  SPECIFY INPUTS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to your database file
-database_file <- "~/development/aos_test/data/meadows.duckdb"
+database_file <- "data/meadows.db"
 # Specify the path to the deployment info file
-deployment_info_file <- "data/meadows/meadows_deployments_2023.csv"
+deployment_info_file <- "data/meadows_deployments_2023.csv"
 
 # Specify the RSSI vs Distance fit coefficients from calibration
 # a <- -103.0610446987
@@ -38,7 +38,7 @@ node_stop_time <- as.POSIXct("2023-08-07 00:00:00", tz = "GMT")
 # Selected Tag Id
 selected_tag_id <- "2D4B782D" # SWSP - Power Tag
 # Analysis Time Range
-det_start_time <- as.POSIXct("2023-10-03 12:00:00", tz = "GMT")
+det_start_time <- as.POSIXct("2023-10-01 12:00:00", tz = "GMT")
 det_stop_time <- as.POSIXct("2023-10-06 12:00:00", tz = "GMT")
 
 # You can specify an alternative map tile URL to use here
@@ -108,6 +108,7 @@ grid_map
 ## -----------------------------------------------------------------------------
 locations_df <- calculate_track(
   start_time = "2023-10-04 23:00:00",
+  # start_time = "2023-08-01 00:00:00",
   length_seconds = 6 * 3600,
   step_size_seconds = 15,
   det_time_window = 30, # Must have detection within this window to be included in position calculation

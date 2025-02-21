@@ -12,10 +12,11 @@ source("R/functions/tag/tag_functions.R")
 ##  SPECIFY INPUTS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to your database file
-database_file <- "~/development/aos_test/data/meadows.duckdb"
+# database_file <- "data/meadows_test.duckdb"
+database_file <- "data/nas_motus_test.duckdb"
 
-start_time <- as.POSIXct("2023-10-01 00:00:00",tz = "GMT")
-stop_time <- as.POSIXct("2023-10-21 00:00:00",tz = "GMT")
+start_time <- as.POSIXct("2023-09-01 00:00:00",tz = "GMT")
+stop_time <- as.POSIXct("2023-09-02 00:00:00",tz = "GMT")
 
 ## -----------------------------------------------------------------------------
 ##  1.) LOAD TAG NODE DETECTION DATA 
@@ -29,17 +30,18 @@ DBI::dbDisconnect(con)
 ## -----------------------------------------------------------------------------
 ##  3.) TAG ACTIVITY
 ## -----------------------------------------------------------------------------
-selected_tag_id <- "2D4B782D" # SWSP - Power Tag
+# selected_tag_id <- "2D4B782D" # SWSP - Power Tag
+selected_tag_id <- '614B661E'
 tag_dets <- subset.data.frame(detection_df, tag_id == selected_tag_id)
 tag_dets <- tag_dets[order(tag_dets$time, decreasing = FALSE), ]
 
-tag_beep_interval <- 13 # seconds
+tag_beep_interval <- 13 # seconds, will need to know of tag type beep intervals
 
 tag_activity <- calculate_tag_activity(tag_dets, tag_beep_interval)
 avg_tag_act <- calc_avg_activity(tag_activity, start_time, stop_time)
 
-plot_start_time <- as.POSIXct("2023-10-03 06:00:00", tz = "GMT")
-plot_stop_time <- as.POSIXct("2023-10-07 06:00:00", tz = "GMT")
+plot_start_time <- as.POSIXct("2023-09-01 06:00:00", tz = "GMT")
+plot_stop_time <- as.POSIXct("2023-09-02 06:00:00", tz = "GMT")
 
 # Scatter Plot of RSSI vs time by Node
 ggplot(tag_dets) +
@@ -80,7 +82,7 @@ ggplot(tag_activity, aes(x = time, y = abs_act)) +
   scale_fill_viridis_c(name = "Counts", trans = "log", breaks = my_breaks, labels = my_breaks) +
   classic_plot_theme
 
-# Avg activity / hour Vs time
+# Avg activity / hour Vs time. need to figure out what is 'activity' detections/hour?
 ggplot(tag_activity) +
   geom_line(data = avg_tag_act, aes(x = time, y = avg_activity),colour = "Red") +
   geom_point(data = avg_tag_act, aes(x = time, y = avg_activity), colour = "Red") +
