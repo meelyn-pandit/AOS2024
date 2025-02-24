@@ -78,18 +78,11 @@ calculate_track <- function(
         # print(rec_df)
 
         ##################################
-        reduced_rec_df <- subset.data.frame(rec_df, rec_df$filtered_rssi >= rssi_coefs[1])
-        # reduced_rec_df < unlist(reduced_rec_df)
-        # print(paste('reduced rec df', reduced_rec_df))
-        print(paste('exp dist', typeof(reduced_rec_df$exp_dist)))
-        print(paste('reduced rec df lat', typeof(reduced_rec_df$lat)))
-        print(paste('reduced rec df lon', typeof(reduced_rec_df$lon)))
-        print(paste('reduced rec df filtered rssi', typeof(reduced_rec_df$filtered_rssi)))
+        reduced_rec_df <- subset.data.frame(rec_df, 
+                                            rec_df$filtered_rssi >= rssi_coefs[1])
         
         node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
-        # print(paste('node_w_max', node_w_max))
-        print(paste('node w max lat', typeof(node_w_max$lat)))
-        print(paste('node w max lon', typeof(node_w_max$lon)))
+
         
         list_exp_dist = reduced_rec_df[['exp_dist']]
         lat = reduced_rec_df[['lat']]
@@ -100,12 +93,13 @@ calculate_track <- function(
                                                       ml_lat,
                                                       ml_lon
                                                       ),
-                      data =reduced_rec_df,
-                      start= list(ml_lat = node_w_max$lat, ml_lon = node_w_max$lon),
-                      control=nls.control(warnOnly = T, minFactor=1/65536, maxiter = 100)
+                      data = reduced_rec_df,
+                      start = list(ml_lat = node_w_max$lat, ml_lon = node_w_max$lon),
+                      control = nls.control(warnOnly = T, 
+                                            minFactor=1/65536, 
+                                            maxiter = 100)
                     )
 
-        # print(paste('multilat fit', multilat_fit))
         co <- coef(summary(multilat_fit))
         ##################################
 

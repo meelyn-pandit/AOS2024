@@ -4,17 +4,17 @@ library(ggplot2)
 options(digits = 10)
 
 # DEFS
-source("src/defs/plot_themes.R")
+source("R/defs/plot_themes.R")
 # UTILS
-source("src/functions/utils/get_time_value.R")
+source("R/functions/utils/get_time_value.R")
 # NDOE
-source("src/functions/node/node_functions.R")
+source("R/functions/node/node_functions.R")
 
 ## -----------------------------------------------------------------------------
 ##  SPECIFY PARAMETERS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to the directory with your station detection data
-database_directory <- "~/development/aos_test/data/meadows.duckdb"
+database_directory <- "data/meadows.db"
 
 # Specify the time range of node data you want to import for this analysis
 start_time <- as.POSIXct("2023-10-01 00:00:00",tz="GMT")
@@ -59,8 +59,15 @@ batt_solar_plot
 ## -----------------------------------------------------------------------------
 ##  3.) CHECK GPS
 ## -----------------------------------------------------------------------------
+# filter meadows nodes due to outlier
+nodes_meadows = node_health_df %>%
+  filter(!node_id %in% '3B3B8F') # get data from all nodes EXCEPT node 3B3B8F
 
+# calculate the node locations based on the latitude and longitude from node health reports
+node_locations <- calculate_node_locations(nodes_meadows)
 
+# plot reported node locations and calculated node locations
+plot_node_locations(nodes_meadows, node_locations)
 
 
 ## -----------------------------------------------------------------------------

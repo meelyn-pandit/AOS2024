@@ -1,6 +1,8 @@
 library(ggplot2)
 
-plot_node_locations <- function(node_health_df, theme = NULL) {
+plot_node_locations <- function(node_health_df, 
+                                node_locs,
+                                theme = NULL) {
     plot <- ggplot() +
         geom_point(
             data = node_locs,
