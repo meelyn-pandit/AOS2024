@@ -73,7 +73,23 @@ plot_node_locations(nodes_meadows, node_locations)
 ## -----------------------------------------------------------------------------
 ##  4.) CHECK TIME OFFSET
 ## -----------------------------------------------------------------------------
+# subtract time from recorded_at, then calculate the average time offset for each node
+node_summary = node_health_df %>%
+  mutate(time_offset = time-recorded_at) %>%
+  group_by(node_id) %>%
+  summarize(mean_time_offset = mean(time_offset), n = n())
 
-
-
-
+ggplot(node_summary,
+       aes(x = node_id, 
+           y = scale(mean_time_offset),
+           color=factor(node_id))) +
+  geom_point() +
+  ggtitle("Time Offset") +
+  # xlab("Time (UTC)") +
+  ylab("Time (s)") +
+  geom_hline(yintercept=0, linetype="dashed", 
+             color = "red", size=2) +
+  classic_plot_theme +
+  theme(axis.title.x = element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
