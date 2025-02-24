@@ -120,7 +120,7 @@ locations_df <- calculate_track(
   rssi_coefs = rssi_coefs,
   track_frame_output_path = NULL # If NULL no individual frames will be saved
 )
-print(track_df)
+print(locations_df)
 track_map <- map_track(node_locs, locations_df, my_tile_url)
 track_map
 

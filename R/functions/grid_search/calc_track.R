@@ -5,6 +5,26 @@ source("R/functions/grid_search/calc_receiver_values.R")
 source("R/functions/grid_search/calc_grid_values.R")
 source("R/functions/grid_search/map_grid_solution.R")
 
+#' Title
+#'
+#' @param start_time 
+#' @param length_seconds 
+#' @param step_size_seconds 
+#' @param det_time_window 
+#' @param filter_alpha 
+#' @param filter_time_range 
+#' @param grid_df 
+#' @param detection_df 
+#' @param node_locs 
+#' @param node_t_offset 
+#' @param rssi_coefs 
+#' @param track_frame_output_path 
+#' @param tile_url 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 calculate_track <- function(
     start_time,
     length_seconds,
@@ -59,16 +79,33 @@ calculate_track <- function(
 
         ##################################
         reduced_rec_df <- subset.data.frame(rec_df, rec_df$filtered_rssi >= rssi_coefs[1])
+        # reduced_rec_df < unlist(reduced_rec_df)
         # print(paste('reduced rec df', reduced_rec_df))
+        print(paste('exp dist', typeof(reduced_rec_df$exp_dist)))
+        print(paste('reduced rec df lat', typeof(reduced_rec_df$lat)))
+        print(paste('reduced rec df lon', typeof(reduced_rec_df$lon)))
+        print(paste('reduced rec df filtered rssi', typeof(reduced_rec_df$filtered_rssi)))
+        
         node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
-
-        multilat_fit <- nls(reduced_rec_df$exp_dist ~ haversine(reduced_rec_df$lat,reduced_rec_df$lon,ml_lat,ml_lon),
-                      reduced_rec_df,
+        # print(paste('node_w_max', node_w_max))
+        print(paste('node w max lat', typeof(node_w_max$lat)))
+        print(paste('node w max lon', typeof(node_w_max$lon)))
+        
+        list_exp_dist = reduced_rec_df[['exp_dist']]
+        lat = reduced_rec_df[['lat']]
+        lon = reduced_rec_df[['lon']]
+        
+        multilat_fit <- nls(list_exp_dist ~ haversine(lat,
+                                                      lon,
+                                                      ml_lat,
+                                                      ml_lon
+                                                      ),
+                      data =reduced_rec_df,
                       start= list(ml_lat = node_w_max$lat, ml_lon = node_w_max$lon),
                       control=nls.control(warnOnly = T, minFactor=1/65536, maxiter = 100)
                     )
 
-        print(paste('multilat fit', multilat_fit))
+        # print(paste('multilat fit', multilat_fit))
         co <- coef(summary(multilat_fit))
         ##################################
 
