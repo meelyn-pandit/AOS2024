@@ -19,9 +19,9 @@ source("R/functions/calibration/calibration_functions.R")
 ##  SPECIFY PARAMETERS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to the sidekick data file you recorded for calibration
-sidekick_file_path <- "data/sidekick/calibration_2023_8_3_all.csv"
+sidekick_file_path <- "data/meadows/sidekick/calibration_2023_8_3_all.csv"
 # Specify the path to your database file
-database_file <- "./data/meadows.db"
+database_file <- "./data/meadows/meadows.db"
 
 # Specify the tag ID that you used in your calibration
 my_tag_id <- "072A6633"

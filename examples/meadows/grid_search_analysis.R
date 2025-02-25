@@ -22,10 +22,10 @@ source("R/functions/grid_search/grid_search_functions.R")
 ## -----------------------------------------------------------------------------
 # Specify the path to your database file
 #database_file <- "~/development/aos_test/data/meadows.duckdb"
-database_file <- "data/meadows.db"
+database_file <- "data/meadows/meadows.db"
 
 # (OPTIONAL) Specify Node time offsets if necessary
-node_time_offset_file <- "data/node_time_offset_8_2_2023.csv"
+node_time_offset_file <- "data/meadows/node_time_offset_8_2_2023.csv"
 node_toff_df <- read.csv(node_time_offset_file)
 
 # Specify the tag ID that you want to locate
@@ -174,7 +174,7 @@ track_map
 ## -----------------------------------------------------------------------------
 # If you've recorded a test track with the sidekick and want to see how well you
 # are able to recreate it you can use the commands below.
-sidekick_file_path <- "data/sidekick/calibration_2023_8_3_t2.csv"
+sidekick_file_path <- "data/meadows/sidekick/calibration_2023_8_3_t2.csv"
 # Get Sidekick data from CSV (note I modified the headers for cleaner names in here)
 sidekick_df <- read.csv(sidekick_file_path)
 # Correct sidekick time formatting

@@ -12,7 +12,7 @@ source("R/functions/tag/tag_functions.R")
 ##  SPECIFY INPUTS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to your database file
-database_file <- "data/meadows.db"
+database_file <- "data/meadows/meadows.db"
 # database_file <- "data/nas_motus_test.duckdb"
 
 start_time <- as.POSIXct("2023-09-01 00:00:00",tz = "GMT")

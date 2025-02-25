@@ -14,7 +14,7 @@ source("R/functions/node/node_functions.R")
 ##  SPECIFY PARAMETERS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to the directory with your station detection data
-database_directory <- "data/meadows.db"
+database_directory <- "data/meadows/meadows.db"
 
 # Specify the time range of node data you want to import for this analysis
 start_time <- as.POSIXct("2023-10-01 00:00:00",tz="GMT")

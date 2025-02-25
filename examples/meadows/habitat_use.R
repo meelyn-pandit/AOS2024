@@ -17,9 +17,9 @@ source("R/functions/grid_search/grid_search_functions.R")
 ##  SPECIFY INPUTS HERE
 ## -----------------------------------------------------------------------------
 # Specify the path to your database file
-database_file <- "data/meadows.db"
+database_file <- "data/meadows/meadows.db"
 # Specify the path to the deployment info file
-deployment_info_file <- "data/meadows_deployments_2023.csv"
+deployment_info_file <- "data/meadows/meadows_deployments_2023.csv"
 
 # Specify the RSSI vs Distance fit coefficients from calibration
 # a <- -103.0610446987
