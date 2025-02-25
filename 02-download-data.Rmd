@@ -1,0 +1,49 @@
+---
+title: "Chapter 2 - Download Data"
+author: "meelyn"
+date: "2025-02-25"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# 2 Download Data
+
+To download your CTT data, you first will need to create an SQL relational database. Why create a relational database instead of loading the csv files directly? Using a database uses much less memory when combining or cleaning data frames compared to loading data directly into RStudio. 
+
+If you are new to relational databases, you should use [DuckDB](https://duckdb.org/why_duckdb), a simple database management systems (DMBS) that is easy to install and use in RStudio.
+
+```{r}
+# install duckdb using renv
+renv::install('duckdb', repos = c('https://duckdb.r-universe.dev', 'https://cloud.r-project.org'))
+```
+
+Below is a sample script to create a DuckDB database
+
+```{r}
+library(celltracktech)
+library(duckdb)
+library(dotenv)
+
+# load env file into environment
+load_dot_env(file='.env')
+
+# Settings ----------------------------------------------------------------
+my_token <- Sys.getenv('API_KEY') # load env variable into my_token
+myproject <- "Meadows V2" # this is your project name on your CTT account, here we are using the CTT project 'Meadows V2'
+outpath <- "./data/meadows/" # where your downloaded files are to go
+
+# Create outpath folder if it does not exist
+if (file.exists(outpath)) {
+  print(paste('Folder exists, no need to create a new directory.'))
+} else {
+  # create a new sub directory inside the main path
+  print(paste('Folder', outpath, 'does not exist, creating it now.'))
+  dir.create(outpath)
+}
+
+# Connect to Database using DuckDB -----------------------------------------------------
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      dbdir = "./data/meadows/meadows.db", 
+                      read_only = FALSE)
+```

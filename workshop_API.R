@@ -2,6 +2,7 @@ library(celltracktech)
 library(duckdb) # added to package, need to re-install
 library(dotenv)
 
+# stores the time you run 
 start <- Sys.time()
 
 # load env file into environment
