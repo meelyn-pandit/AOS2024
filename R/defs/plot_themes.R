@@ -15,6 +15,7 @@ classic_plot_theme <- theme(
         face = "bold",
         hjust = 0.5
     ),
+
 )
 
 tag_hist_plot_theme <- theme(

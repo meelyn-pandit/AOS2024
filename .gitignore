@@ -61,5 +61,6 @@ rsconnect/
 data/*
 test_data/*
 renv/*
+*.html
 
 # End of https://www.toptal.com/developers/gitignore/api/r

@@ -87,8 +87,8 @@ ggplot(node_summary,
   ggtitle("Time Offset") +
   # xlab("Time (UTC)") +
   ylab("Time (s)") +
-  geom_hline(yintercept=0, linetype="dashed", 
-             color = "red", size=2) +
+  geom_hline(yintercept=0, linetype="dotted", 
+             color = "red", size=1) +
   classic_plot_theme +
   theme(axis.title.x = element_blank(),
         axis.text.x=element_blank(),
