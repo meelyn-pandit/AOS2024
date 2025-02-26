@@ -1,3 +1,6 @@
+library(devtools)
+install_github('cellular-tracking-technologies/celltracktech')
+
 library(celltracktech)
 library(duckdb) # added to package, need to re-install
 library(dotenv)
@@ -30,7 +33,7 @@ if (file.exists(outpath)) {
 
 # Connect to Database using DuckDB -----------------------------------------------------
 con <- DBI::dbConnect(duckdb::duckdb(), 
-                      dbdir = "./data/meadows/meadows.db", 
+                      dbdir = "./data/meadows/meadows.duckdb", 
                       read_only = FALSE)
 
 # Get data from CTT Server ------------------------------------------------
@@ -39,7 +42,7 @@ get_my_data(my_token,
             con, 
             myproject=myproject, 
             begin=as.Date("2023-08-01"), 
-            end=as.Date("2023-12-31"), 
+            end=as.Date("2023-08-02"), 
             filetypes=c("raw", "node_health")
 )
 
