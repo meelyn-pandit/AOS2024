@@ -4,7 +4,8 @@ author: "meelyn"
 date: "2025-02-25"
 output: html_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: console,
+  eval: FALSE
 ---
 
 # 1 Project Setup
@@ -27,6 +28,12 @@ Here we will go over how to create a local project directory (or folder as it is
 
 [Renv](https://rstudio.github.io/renv/articles/renv.html) stands for 'R Virtual Environment', which creates reproducible environments for your R projects. Many new data scientists would download all their individual packages into one location, usually the R library. While this global (i.e. accessible anywhere on your computer) library is convenient, certain packages or package versions can conflict with each other, causing errors and preventing you from analyzing your data. With renv, you can download all the packages for your project in your project directory, which will lead to fewer problems due to conflicting packages/versions.
 
+```{r eval=FALSE}
+install.packages('renv')
+library(renv)
+
+renv::activate()
+```
 
 ## 1.2 Create a '.env' file
 
@@ -41,7 +48,7 @@ touch .env
 echo "API_KEY=your_api_key" >> .env
 ```    
 
-```{r eval = knitr::is_html_output(), echo = knitr::is_html_output()}
+```{r eval = FALSE}
 install.packages('dotenv')
 library(dotenv)
 

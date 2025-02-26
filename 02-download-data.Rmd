@@ -18,6 +18,8 @@ If you are new to relational databases, you should use [DuckDB](https://duckdb.o
 renv::install('duckdb', repos = c('https://duckdb.r-universe.dev', 'https://cloud.r-project.org'))
 ```
 
+## 2.1 Create a DuckDB database
+
 Below is a sample script to create a DuckDB database
 
 ```{r}
@@ -31,19 +33,100 @@ load_dot_env(file='.env')
 # Settings ----------------------------------------------------------------
 my_token <- Sys.getenv('API_KEY') # load env variable into my_token
 myproject <- "Meadows V2" # this is your project name on your CTT account, here we are using the CTT project 'Meadows V2'
+
+# Create your data directory if it does not exist
 outpath <- "./data/meadows/" # where your downloaded files are to go
 
-# Create outpath folder if it does not exist
-if (file.exists(outpath)) {
-  print(paste('Folder exists, no need to create a new directory.'))
-} else {
-  # create a new sub directory inside the main path
-  print(paste('Folder', outpath, 'does not exist, creating it now.'))
-  dir.create(outpath)
-}
+# create_outpath(outpath)
+# project_dir <- getwd()
+# 
+# if (file.exists(outpath)) {
+#   print(paste('Folder exists, no need to create a new directory.'))
+# } else {
+#   # create a new sub directory inside the main path
+#   print(paste('Folder', outpath, 'does not exist, creating it now.'))
+#   dir.create(file.path(project_dir, outpath), recursive = TRUE)
+# }
 
 # Connect to Database using DuckDB -----------------------------------------------------
 con <- DBI::dbConnect(duckdb::duckdb(), 
-                      dbdir = "./data/meadows/meadows.db", 
+                      dbdir = "./data/meadows/meadows.duckdb", 
                       read_only = FALSE)
 ```
+
+
+## 2.2 Download data from the CTT API
+
+You are now connected to your DuckDB database, but so far nothing is in the database. The script below will download and insert the files into your local database.
+```{r}
+get_my_data(my_token,
+            outpath, 
+            con, 
+            myproject=myproject, 
+            begin=as.Date("2023-08-01"), 
+            end=as.Date("2023-12-31"), 
+            filetypes=c("raw", "node_health")
+)
+```
+
+## 2.3 Updating the database
+
+You have downloaded the compressed data (i.e. the '.csv.gz' files), now you will need to insert them into your DuckDB database:
+
+```{r}
+update_db(con, outpath, myproject)
+```
+
+## 2.4 Disconnecting from the database
+
+The benefit of using a relational database is that it does not need to be loaded into your computer memory the entire time you are analyzing your data. You can connect to it, filter/clean the data you want, and then disconnect once you are done, freeing up computer memory for more intensive data analysis tasks.
+
+To disconnect from the database, run the following command:
+```{r}
+DBI::dbDisconnect(con)
+```
+
+## 2.5 Uploading Node Data from the SD Card
+
+**Note! This step is optional! If you are not uploading data from the Node SD cards, you can skip to chapter 3!**
+
+### 2.5.1 Create Nodes directory
+
+To upload Node data from the SD cards, you will need to create a 'nodes' folder in the CTT Project Name folder. For example, we will create a folder in the 'Meadows V2' folder in the './data/meadows/' directory:
+
+```{r}
+create_outpath('./data/meadows/Meadows V2/nodes/')
+```
+
+### 2.5.2 Create individual directories for each Node
+
+Then, create a folder for each Node. In the example below, we are creating a folder for Node 3B8845:
+
+```{r}
+create_outpath('./data/meadows/Meadows V2/nodes/3B8845/')
+```
+
+### 2.5.3 Upload Node data to your DuckDB database
+
+Remember, we need to re-connect to the DuckDB database to upload the Node data:
+```{r}
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      dbdir = "./data/meadows/meadows.duckdb", 
+                      read_only = FALSE)
+
+# Import node data into your database
+import_node_data(d = con,
+                 outpath = outpath,
+                 myproject = myproject)
+
+# update the database
+update_db(d = con,
+          outpath = outpath,
+          myproject = myproject,
+          fix = FALSE)
+
+# disconnect from the database
+DBI::dbDisconnect(con)
+```
+
+You have finished uploading data to your database!
