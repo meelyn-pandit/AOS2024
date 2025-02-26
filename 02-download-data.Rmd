@@ -13,19 +13,25 @@ To download your CTT data, you first will need to create an SQL relational datab
 
 If you are new to relational databases, you should use [DuckDB](https://duckdb.org/why_duckdb), a simple database management systems (DMBS) that is easy to install and use in RStudio.
 
-```{r}
+**!NOTE** The DuckDB install will take ~ 30 min. Please allocate time accordingly.
+```{r eval=FALSE}
 # install duckdb using renv
-renv::install('duckdb', repos = c('https://duckdb.r-universe.dev', 'https://cloud.r-project.org'))
+library(renv)
+
+renv::install(c('httr', 'DBI', 'RPostgres', 'tidyverse', 'rjson', 'dplyr', 'tidyr', 'tibble', 'readr', 'dotenv'))
+# renv::install('duckdb', repos = c('https://duckdb.r-universe.dev', 'https://cloud.r-project.org'))
+renv::install('duckdb/duckdb-r')
 ```
 
 ## 2.1 Create a DuckDB database
 
 Below is a sample script to create a DuckDB database
 
-```{r}
+```{r eval=FALSE}
 library(celltracktech)
-library(duckdb)
-library(dotenv)
+
+# activate renv environment
+renv::activate()
 
 # load env file into environment
 load_dot_env(file='.env')
@@ -37,16 +43,7 @@ myproject <- "Meadows V2" # this is your project name on your CTT account, here 
 # Create your data directory if it does not exist
 outpath <- "./data/meadows/" # where your downloaded files are to go
 
-# create_outpath(outpath)
-# project_dir <- getwd()
-# 
-# if (file.exists(outpath)) {
-#   print(paste('Folder exists, no need to create a new directory.'))
-# } else {
-#   # create a new sub directory inside the main path
-#   print(paste('Folder', outpath, 'does not exist, creating it now.'))
-#   dir.create(file.path(project_dir, outpath), recursive = TRUE)
-# }
+create_outpath(outpath)
 
 # Connect to Database using DuckDB -----------------------------------------------------
 con <- DBI::dbConnect(duckdb::duckdb(), 
@@ -58,7 +55,7 @@ con <- DBI::dbConnect(duckdb::duckdb(),
 ## 2.2 Download data from the CTT API
 
 You are now connected to your DuckDB database, but so far nothing is in the database. The script below will download and insert the files into your local database.
-```{r}
+```{r eval=FALSE}
 get_my_data(my_token,
             outpath, 
             con, 
@@ -73,7 +70,7 @@ get_my_data(my_token,
 
 You have downloaded the compressed data (i.e. the '.csv.gz' files), now you will need to insert them into your DuckDB database:
 
-```{r}
+```{r eval=FALSE}
 update_db(con, outpath, myproject)
 ```
 
@@ -82,7 +79,7 @@ update_db(con, outpath, myproject)
 The benefit of using a relational database is that it does not need to be loaded into your computer memory the entire time you are analyzing your data. You can connect to it, filter/clean the data you want, and then disconnect once you are done, freeing up computer memory for more intensive data analysis tasks.
 
 To disconnect from the database, run the following command:
-```{r}
+```{r eval=FALSE}
 DBI::dbDisconnect(con)
 ```
 
@@ -94,7 +91,7 @@ DBI::dbDisconnect(con)
 
 To upload Node data from the SD cards, you will need to create a 'nodes' folder in the CTT Project Name folder. For example, we will create a folder in the 'Meadows V2' folder in the './data/meadows/' directory:
 
-```{r}
+```{r eval=FALSE}
 create_outpath('./data/meadows/Meadows V2/nodes/')
 ```
 
@@ -102,14 +99,14 @@ create_outpath('./data/meadows/Meadows V2/nodes/')
 
 Then, create a folder for each Node. In the example below, we are creating a folder for Node 3B8845:
 
-```{r}
+```{r eval=FALSE}
 create_outpath('./data/meadows/Meadows V2/nodes/3B8845/')
 ```
 
 ### 2.5.3 Upload Node data to your DuckDB database
 
 Remember, we need to re-connect to the DuckDB database to upload the Node data:
-```{r}
+```{r eval=FALSE}
 con <- DBI::dbConnect(duckdb::duckdb(), 
                       dbdir = "./data/meadows/meadows.duckdb", 
                       read_only = FALSE)
