@@ -6,7 +6,7 @@ options(digits = 10)
 source("R/defs/plot_themes.R")
 # UTILS
 source("R/functions/utils/get_time_value.R")
-# NDOE
+# NODE
 source("R/functions/node/node_functions.R")
 # TAG
 source("R/functions/tag/tag_functions.R")
@@ -21,7 +21,7 @@ source("R/functions/calibration/calibration_functions.R")
 # Specify the path to the sidekick data file you recorded for calibration
 sidekick_file_path <- "data/meadows/sidekick/calibration_2023_8_3_all.csv"
 # Specify the path to your database file
-database_file <- "./data/meadows/meadows.db"
+database_file <- "./data/meadows/meadows.duckdb"
 
 # Specify the tag ID that you used in your calibration
 my_tag_id <- "072A6633"
@@ -96,8 +96,6 @@ sidekick_tag_df <- subset.data.frame(sidekick_all_df, tag_id == my_tag_id)
 # Show location of all beeps in relation to node locations
 calibration_map <- map_calibration_track(node_locs, sidekick_tag_df, tile_url = my_tile_url)
 calibration_map
-
-## ALTERNATIVE TO SIDEKICK: csv with tag id, location, and time, keep the use_sync set to FALSE
 
 ## -----------------------------------------------------------------------------
 ##  5.) CALCULATE THE RSSI VS DISTANCE RELATIONSHIP

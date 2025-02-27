@@ -26,6 +26,7 @@ library(renv)
 renv::install(c('httr', 'DBI', 'RPostgres', 'tidyverse', 'rjson', 'dplyr', 'tidyr', 'tibble', 'readr', 'dotenv'))
 # renv::install('duckdb', repos = c('https://duckdb.r-universe.dev', 'https://cloud.r-project.org'))
 renv::install('duckdb/duckdb-r')
+renv::install('cellular-tracking-technologies/celltracktech')
 ```
 
 ## 2.1 Create a DuckDB database
