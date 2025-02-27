@@ -77,6 +77,5 @@ You are now ready to start downloading data!
 In your project directory create the following folders to organize your files:
 
 * src - where you store your .R scripts
-* data - store unedited data files (.csv.gz files)
-* data_clean - store dataframes that were clean/organized by R
+* data - store downloaded data from CTT and modified dataframes
 * results - store plots and tables
