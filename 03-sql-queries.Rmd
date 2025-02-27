@@ -31,10 +31,19 @@ con <- DBI::dbConnect(duckdb::duckdb(),
 
 # list tables in database
 DBI::dbListTables(con)
+
+# disconnect from database
+DBI::dbDisconnect(con)
+
 ```
 ## 3.2 Load each data table into RStudio
 
 ```{r}
+# connect to database
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      dbdir = "./data/meadows/meadows.duckdb", 
+                      read_only = FALSE)
+
 # list last 10 records in raw
 raw = DBI::dbGetQuery(con, "SELECT * FROM raw "); raw
 tail(raw)
