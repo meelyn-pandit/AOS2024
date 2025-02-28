@@ -28,7 +28,7 @@ detection_df <- tbl(con, "raw") |>
   collect()
 DBI::dbDisconnect(con)
 ## -----------------------------------------------------------------------------
-##  3.) TAG ACTIVITY
+##  2.) TAG ACTIVITY
 ## -----------------------------------------------------------------------------
 # selected_tag_id <- "2D4B782D" # SWSP - Power Tag
 selected_tag_id <- '614B661E'
