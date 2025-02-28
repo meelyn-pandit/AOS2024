@@ -81,9 +81,20 @@ calculate_track <- function(
         reduced_rec_df <- subset.data.frame(rec_df, 
                                             rec_df$filtered_rssi >= rssi_coefs[1])
         
-        node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
-
+        # if filtered rec_df has only 1 row, skip and move on with for loop
+        if (nrow(reduced_rec_df) < 2) next
         
+        node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
+        
+        # if filtered_rssi values match, leads to two rows or more rows, arrange by latest time, then obtain first row
+        if(nrow(node_w_max) > 1) {
+          node_w_max <- node_w_max %>%
+            arrange(desc(latest_time)) %>%
+            filter(row_number()==1)
+        }
+        
+
+        # 
         list_exp_dist = reduced_rec_df[['exp_dist']]
         lat = reduced_rec_df[['lat']]
         lon = reduced_rec_df[['lon']]

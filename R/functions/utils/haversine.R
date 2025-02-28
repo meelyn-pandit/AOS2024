@@ -1,4 +1,5 @@
 haversine <- function(lat1, lon1, lat2, lon2) {
+  # print(paste('lat1', lat1, 'lon1', lon1, 'lat2', lon2))
     pi <- 3.1415926535897932
     earth_radius <- 6371.0e3 # meters
     phi1 <- lat1 * pi / 180.0 # φ, λ in radians
@@ -10,6 +11,6 @@ haversine <- function(lat1, lon1, lat2, lon2) {
 
     c <- 2 * atan2(sqrt(a), sqrt(1 - a))
     d <- earth_radius * c # in meters
-
+    # print(paste('d', d))
     return(d) # meters
 }
