@@ -15,6 +15,13 @@ knitr::opts_chunk$set(eval = FALSE)
 If you are interested in where animals spend time, use this chapter to provide you with the code scripts to calculate tag detections into habitat use.
 
 ## 8.1 Load libraries and settings
+
+Activate renv
+```{r}
+renv::activate()
+```
+
+Load libraries and settings
 ```{r}
 library(dplyr)
 library(duckdb)
@@ -38,13 +45,21 @@ database_file <- "data/meadows/meadows.duckdb"
 # Specify the path to the deployment info file
 deployment_info_file <- "data/meadows/meadows_deployments_2023.csv"
 ```
+Find unique tags
+```{r}
+unique_tags = raw %>%
+  group_by(tag_id) %>%
+  summarize(num_detect = n()) %>%
+  select(tag_id, num_detect) %>%
+  arrange(desc(num_detect))
+```
+
 
 Remember Chapter 5 in which we calibrated the node grid? We will want to use those RSSI coefficients to accurately calculate the tag tracks from the detection data. 
 
 We will set the coefficients in the code block below, as well as our start and stop time for the Nodes, and for the tag detections. 
 ```{r}
 # Specify the RSSI vs Distance fit coefficients from calibration
-# a <- -115.0 for 1/8 wave tags?
 a <- -103.46373779280
 b <- -59.03199894670
 c <- 0.01188255653
@@ -58,8 +73,8 @@ rssi_coefs <- c(a, b, c)
 node_start_time <- as.POSIXct("2023-08-01 00:00:00", tz = "GMT")
 node_stop_time <- as.POSIXct("2023-08-07 00:00:00", tz = "GMT")
 
-# Selected Tag Id - Power Tag on a Swamp Sparrow (SWSP)
-selected_tag_id <- "2D4B782D"
+# Selected Tag Id - Hybrid tag on a Gray Catbird (GRCA)
+selected_tag_id <- '2A33611E' # tag with most detections, 1/4 wave
 
 # Analysis Time Range
 det_start_time <- as.POSIXct("2023-10-01 12:00:00", tz = "GMT")
@@ -79,14 +94,18 @@ con <- DBI::dbConnect(duckdb::duckdb(),
 
 # load node_health data table into RStudio and filter it based on the start and stop time
 node_health_df <- tbl(con, "node_health") |>
-  filter(time >= node_start_time & time <= node_stop_time) |>
+  filter(time >= node_start_time && time <= node_stop_time) |>
   collect()
 
 # disconnect from the database
 DBI::dbDisconnect(con)
 
 # Remove duplicates
-node_health_df <- node_health_df %>% distinct(node_id, time, recorded_at, .keep_all = TRUE)
+node_health_df <- node_health_df %>% 
+  distinct(node_id, 
+           time, 
+           recorded_at, 
+           .keep_all = TRUE)
 ```
 
 ## 8.3 Get Node Locations
@@ -117,7 +136,7 @@ con <- DBI::dbConnect(duckdb::duckdb(), dbdir = database_file, read_only = TRUE)
 
 # load raw data table into RStudio and filter it based on start and stop time
 detection_df <- tbl(con, "raw") |>
-  filter(time >= det_start_time & time <= det_stop_time) |>
+  filter(time >= det_start_time && time <= det_stop_time) |>
   filter(tag_id == selected_tag_id) |>
   collect()
 
@@ -125,7 +144,8 @@ detection_df <- tbl(con, "raw") |>
 DBI::dbDisconnect(con)
 
 # create time_value variable
-detection_df <- detection_df %>% mutate(time_value = as.integer(time))
+detection_df <- detection_df %>% 
+  mutate(time_value = as.integer(time))
 ```
 
 ## 8.5 Build a Grid
@@ -184,6 +204,20 @@ source("R/functions/grid_search/grid_search_functions.R")
 loc_density <- calc_location_density(grid_df = grid_df, 
                                      locations_df = locations_df)
 
-loc_desnity_map <- map_location_density(loc_density_df = loc_density,my_tile_url)
-loc_desnity_map
+loc_density_map <- map_location_density(loc_density_df = loc_density, my_tile_url)
+loc_density_map
+```
+For tags with 1/8 wavelengths, you may need to use a lower RSSI coefficient to accurately map tracks and habitat use. Try using -115 for RSSI coefficient 'a'.
+
+```{r}
+# Specify the RSSI vs Distance fit coefficients from calibration
+a <- -115.0 # for 1/8 wave tags
+b <- -59.03199894670
+c <- 0.01188255653
+
+rssi_coefs <- c(a, b, c)
+
+# Selected Tag Id - Power Tag on a Swamp Sparrow (SWSP), 1/8 wave, may need to set rssi coefficient lower for detections
+selected_tag_id <- "2D4B782D"
+
 ```

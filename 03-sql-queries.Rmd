@@ -49,7 +49,7 @@ raw = DBI::dbGetQuery(con, "SELECT * FROM raw "); raw
 tail(raw)
 
 # list last 10 records in blu
-blu = DBI::dbGetQuery(con, "SELECT * FROM raw "); blu
+blu = DBI::dbGetQuery(con, "SELECT * FROM blu "); blu
 tail(blu)
 head(blu)
 
