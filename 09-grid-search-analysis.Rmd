@@ -1,9 +1,35 @@
+---
+title: "Chapter 9 - Grid Search Analysis"
+author: "meelyn"
+date: "2025-03-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+# 9 Grid Search Analysis
+
+## 9.1 Loading Settings
+
+### 9.1.1 Activate renv
+```{r}
+renv::activate()
+```
+
+### 9.1.2 Load libraries
+
+```{r}
 library(dplyr)
 library(duckdb)
 library(ggplot2)
+```
 
-options(digits = 10)
+### 9.1.3 Load functions
 
+```{r}
 # DEFS
 source("R/defs/plot_themes.R")
 # UTILS
@@ -16,16 +42,15 @@ source("R/functions/tag/load_node_detection_data.R")
 source("R/functions/sidekick/load_sidekick_data.R")
 # GRID SEARCH
 source("R/functions/grid_search/grid_search_functions.R")
+```
 
-## -----------------------------------------------------------------------------
-##  SPECIFY PARAMETERS HERE
-## -----------------------------------------------------------------------------
+### 9.1.4 Load settings
+```{r}
 # Specify the path to your database file
-#database_file <- "~/development/aos_test/data/meadows.duckdb"
-database_file <- "data/meadows/meadows.duckdb"
+database_file <- "./data/meadows/meadows.duckdb"
 
 # (OPTIONAL) Specify Node time offsets if necessary
-node_time_offset_file <- "data/meadows/node_time_offset_8_2_2023.csv"
+node_time_offset_file <- "./data/node_time_offset_8_2_2023.csv"
 node_toff_df <- read.csv(node_time_offset_file)
 
 # Specify the tag ID that you want to locate
@@ -55,25 +80,24 @@ det_stop_time <- as.POSIXct("2023-08-04 00:00:00", tz = "GMT")
 
 # You can specify an alternative map tile URL to use here
 my_tile_url <- "https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
-## -----------------------------------------------------------------------------
-## -----------------------------------------------------------------------------
+```
 
-## -----------------------------------------------------------------------------
-##  1.) LOAD NODE HEALTH DATA FROM FILES
-## -----------------------------------------------------------------------------
+## 9.2 Load Node Health data from Database
+```{r}
 # Load from DB
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = database_file, read_only = TRUE)
 node_health_df <- tbl(con, "node_health") |>
   filter(time >= node_start_time & time <= node_stop_time) |>
   collect()
 DBI::dbDisconnect(con)
-## -----------------------------------------------------------------------------
-##  2.) GET NODE LOCATIONS
-## -----------------------------------------------------------------------------
+```
+
+## 9.3 Get Node Locations
+```{r}
 # Calculate the average node locations
 node_locs <- calculate_node_locations(node_health_df)
 # Plot the average node locations
-node_loc_plot <- plot_node_locations(node_health_df, 
+node_loc_plot <- plot_node_locations(node_health_df,
                                      node_locs,
                                      theme = classic_plot_theme)
 node_loc_plot
@@ -82,10 +106,10 @@ export_node_locations("examples/meadows/output/node_locations.csv", node_locs)
 # Draw a map with the node locations
 node_map <- map_node_locations(node_locs, tile_url = my_tile_url)
 node_map
+```
 
-## -----------------------------------------------------------------------------
-##  3.) LOAD STATION DETECTION DATA
-## -----------------------------------------------------------------------------
+## 9.4 Load Station Detection Data
+```{r}
 # Load from DB
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = database_file, read_only = TRUE)
 detection_df <- tbl(con, "raw") |>
@@ -94,9 +118,10 @@ detection_df <- tbl(con, "raw") |>
   collect()
 DBI::dbDisconnect(con)
 detection_df <- detection_df %>% mutate(time_value = as.integer(time))
-## -----------------------------------------------------------------------------
-##  4.) BUILD A GRID
-## -----------------------------------------------------------------------------
+```
+
+## 9.5 Build a Node Grid
+```{r}
 grid_center_lat <- 38.93664800
 grid_center_lon <- -74.9462
 grid_size_x <- 500 # meters
@@ -115,9 +140,11 @@ grid_df <- build_grid(
 grid_map <- draw_grid(node_locs, grid_df)
 grid_map
 
-## -----------------------------------------------------------------------------
-##  5.) (OPTIONAL) CALCULATE TEST SOLUTION
-## -----------------------------------------------------------------------------
+```
+
+## 9.6 (Optional) Calculate Test Solution
+
+```{r}
 test_time <- as.POSIXct("2023-08-03 19:57:50", tz = "GMT")
 test_rec_df <- calc_receiver_values(
   current_time = test_time,
@@ -130,10 +157,12 @@ test_rec_df <- calc_receiver_values(
   filter_time_range = 120
 )
 print(test_rec_df)
+
 # Find the GridSearch Solution
 test_grid_values <- calc_grid_values(grid_df, test_rec_df, rssi_coefs)
 solution <- subset(test_grid_values, test_grid_values$value == max(test_grid_values$value))
 print(solution)
+
 # Multilateration calculation
 reduced_rec_df <- subset.data.frame(test_rec_df, test_rec_df$filtered_rssi >= a)
 node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
@@ -143,16 +172,23 @@ multilat_fit <- nls(reduced_rec_df$exp_dist ~ haversine(reduced_rec_df$lat,reduc
                       control=nls.control(warnOnly = T, minFactor=1/65536, maxiter = 100)
                     )
 print(multilat_fit)
-co <- coef(summary(multilat_fit))
-print(paste(co[1,1],co[2,1]))
-multilat_result <- c(co[1,1],co[2,1])
-test_map <- draw_single_solution(test_rec_df, test_grid_values, solution, multilat_result, my_tile_url)
-test_map
 
-## -----------------------------------------------------------------------------
-##  6.) CALCULATE TRACK
-## -----------------------------------------------------------------------------
-# track_frame_output_path <- "output/track_frames/"
+co <- coef(summary(multilat_fit))
+
+print(paste(co[1,1],co[2,1]))
+
+multilat_result <- c(co[1,1],co[2,1])
+test_map <- draw_single_solution(test_rec_df, 
+                                 test_grid_values, 
+                                 solution, 
+                                 multilat_result, 
+                                 my_tile_url)
+test_map
+```
+
+## 9.7 Calculate Track
+
+```{r}
 track_df <- calculate_track(
   start_time = "2023-08-03 19:50:45",
   length_seconds = 1050,
@@ -170,10 +206,11 @@ track_df <- calculate_track(
 print(track_df)
 track_map <- map_track(node_locs, track_df, my_tile_url)
 track_map
+```
 
-## -----------------------------------------------------------------------------
-##  7.) (OPTIONAL) COMPARE WITH KNOWN TRACK?
-## -----------------------------------------------------------------------------
+## 9.8 (Optional) Compare with Known Track
+
+```{r}
 # If you've recorded a test track with the sidekick and want to see how well you
 # are able to recreate it you can use the commands below.
 sidekick_file_path <- "data/meadows/sidekick/calibration_2023_8_3_t2.csv"
@@ -195,8 +232,11 @@ print(paste("GS Solution Error = ", mean(track_error_df$error), " +/- ", sd(trac
 
 compare_map <- map_track_error(node_locs, track_error_df, sidekick_df, my_tile_url)
 compare_map
+```
 
-# Uncertainty analysis
+## 9.9 Plot Uncertainty Analysis
+```{r}
+# need legend for different color dots
 ggplot() +
   geom_point(data = track_error_df, aes(x = i, y = ml_error), color = "orange") +
   geom_point(data = track_error_df, aes(x = i, y = error)) +
@@ -210,4 +250,4 @@ ggplot() +
   xlab("Max RSSI (dBm)") +
   ylab("Position Error (m)") +
   classic_plot_theme
-
+```
