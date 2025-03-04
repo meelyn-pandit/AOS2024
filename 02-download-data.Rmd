@@ -18,6 +18,11 @@ To download your CTT data, you first will need to create an SQL relational datab
 
 If you are new to relational databases, you should use [DuckDB](https://duckdb.org/why_duckdb), a simple database management systems (DMBS) that is easy to install and use in RStudio.
 
+```{r}
+# activate renv environment
+renv::activate()
+```
+
 **!NOTE** The DuckDB install will take ~ 30 min. Please allocate time accordingly.
 ```{r eval=FALSE}
 # install duckdb using renv
@@ -35,9 +40,6 @@ Below is a sample script to create a DuckDB database
 
 ```{r eval=FALSE}
 library(celltracktech)
-
-# activate renv environment
-renv::activate()
 
 # load env file into environment
 load_dot_env(file='.env')
@@ -65,9 +67,9 @@ You are now connected to your DuckDB database, but so far nothing is in the data
 get_my_data(my_token,
             outpath, 
             con, 
-            myproject=myproject, 
-            begin=as.Date("2023-08-01"), 
-            end=as.Date("2023-12-31"), 
+            myproject=myproject,
+            begin=as.Date("2023-08-01"),
+            end=as.Date("2023-12-31"),
             filetypes=c("raw", "node_health")
 )
 ```

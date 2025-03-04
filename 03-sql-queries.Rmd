@@ -63,5 +63,12 @@ df_table = DBI::dbGetQuery(con, 'SELECT * FROM data_file')
 DBI::dbDisconnect(con)
 
 ```
-
+Find unique tags
+```{r}
+unique_tags = raw %>%
+  group_by(tag_id) %>%
+  summarize(num_detect = n()) %>%
+  select(tag_id, num_detect) %>%
+  arrange(desc(num_detect))
+```
 Note: you do not need to load each table into RStudio. You should only load the tables you need to for your analysis.

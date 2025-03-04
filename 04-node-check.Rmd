@@ -161,6 +161,11 @@ node_summary = node_health_df %>%
   group_by(node_id) %>%
   summarize(mean_time_offset = mean(time_offset), n = n())
 
+# save node time offsets to csv
+readr::write_csv(node_summary,
+                 file = './data/meadows/node_time_offset_20230802.csv')
+
+# plot the time offset
 ggplot(node_summary,
        aes(x = node_id, 
            # y = scale(mean_time_offset),
