@@ -30,33 +30,38 @@ source("R/Functions_Paxton-CTTUpdate.R")
 ### 10.1.3 Re-create sample data for calibration
 ```{r}
 #create time window by reducing location precision or can input data with TestId column (user-defined window)
-mytest <- read.csv("calibration_2023_8_3_all.csv")
+mytest <- read.csv("./calibration_2023_8_3_all.csv")
 mytest$Time <- as.POSIXct(mytest$time_utc, tz="UTC")
 
+# connect to database
 con <- DBI::dbConnect(duckdb::duckdb(), 
                       dbdir = "./data/meadows/meadows.duckdb", 
                       read_only = TRUE)
 
+# filter for specific dates
 testdata <- tbl(con, "raw") |> 
-  filter(time >= as.Date("2023-07-31") & time <= as.Date("2023-10-31")) |>
+  filter(time >= as.Date("2023-07-31") && time <= as.Date("2023-10-31")) |>
   filter(tag_id %in% tagid) |>
   collect()
 
+# set node start and stop dates
 start_buff = as.Date("2023-08-01", tz="UTC")
 end_buff = as.Date("2023-08-07", tz="UTC")
 
 nodehealth <- tbl(con, "node_health") |>
-  filter(time >= start_buff  & time <= end_buff) |>
+  filter(time >= start_buff  && time <= end_buff) |>
   collect()
 
+# disconnect from database
 DBI::dbDisconnect(con)
 
+# create dataframe of nodes and their locations (lat, lon)
 nodes <- node_file(nodehealth)
 ```
 
-## 10.2 Isolate raw RSS data from Node network associated with Test Data
+## 10.2 Isolate raw Received Signal Strength (RSS) data from Node network associated with Test Data
 ```{r}
-combined.data <- data.setup(mytest, 
+combined_data <- data.setup(mytest, 
                             testdata, 
                             nodes, 
                             tag_col="tag_id", 
@@ -66,13 +71,14 @@ combined.data <- data.setup(mytest,
                             x="lon",
                             y="lat", 
                             loc_precision=6, 
-                            fileloc="./data/meadows/meadows.duckdb", filetype="raw")
+                            fileloc="./data/meadows/meadows.duckdb", 
+                            filetype="raw")
 ```
 
 ## 10.3 Exponential Decay Function - Relationship between Distance and Tag RSS Values
 ```{r}
 # Plot of the relationship between RSS and distance
-ggplot(data = combined.data, 
+ggplot(data = combined_data, 
        aes(x = distance, 
            y = avgRSS, 
            color = node_id)) +
@@ -87,12 +93,12 @@ ggplot(data = combined.data,
 * lrc - natural logarithm of the rate constant (rate of decay)
 
 ```{r}
-# preliminary model
+# preliminary model - non-linear sampling
 exp.mod <- nls(avgRSS ~ SSasymp(distance, 
                                 Asym, 
                                 R0, 
                                 lrc), 
-               data = combined.data)
+               data = combined_data)
 
   # Summary of Model
 summary(exp.mod)
@@ -117,8 +123,11 @@ S <- exp(coef(exp.mod)[["lrc"]])
 K <- coef(exp.mod)[["Asym"]]
   
   # Final Model
-nls.mod <- nls(avgRSS ~ a * exp(-S * distance) + K, start = list(a = a, S = S, K= K), 
-               data = combined.data)
+nls.mod <- nls(avgRSS ~ a * exp(-S * distance) + K, 
+               start = list(a = a, 
+                            S = S, 
+                            K= K), 
+               data = combined_data)
   # Model Summary
 summary(nls.mod)
   # Model Coefficients 
@@ -126,21 +135,21 @@ coef(nls.mod)
 
 ## Check the fit of the model and get predicted values
   # Get residuals and fit of model and add variables to main table
-combined.data$E <- residuals(nls.mod)
-combined.data$fit <- fitted(nls.mod)
+combined_data$E <- residuals(nls.mod)
+combined_data$fit <- fitted(nls.mod)
 
   # Plot residuals by fit or distance
-#ggplot(combined.data, aes(x = distance, y = E, color = node_id)) +
+#ggplot(combined_data, aes(x = distance, y = E, color = node_id)) +
 #        geom_point(size = 2)
 
-#ggplot(combined.data, aes(x = fit, y = E, color = node_id)) +
+#ggplot(combined_data, aes(x = fit, y = E, color = node_id)) +
 #  geom_point(size = 2)
 
   # Get model predictions
-combined.data$pred <- predict(nls.mod)
+combined_data$pred <- predict(nls.mod)
 
 ## Plot with predicted line
-ggplot(combined.data, aes(x = distance, y = avgRSS, color=node_id)) + 
+ggplot(combined_data, aes(x = distance, y = avgRSS, color=node_id)) + 
   geom_point() +
   geom_line(aes(y = pred), color="black", lwd = 1.25) +
   scale_y_continuous(name = "RSS (dB)") +
@@ -151,10 +160,10 @@ K <- unname(coef(nls.mod)[3])
 a <- unname(coef(nls.mod)[1])
 S <- unname(coef(nls.mod)[2])
 
-combined.data <- estimate.distance(combined.data, K, a, S)
+combined_data <- estimate.distance(combined_data, K, a, S)
 
 tile_url = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-testout <- combined.data[combined.data$TestId==0,]
+testout <- combined_data[combined_data$TestId==0,]
 leaflet() %>%
     addTiles(
       urlTemplate = tile_url,
@@ -179,12 +188,12 @@ leaflet() %>%
       #fillColor = "red",
       fillOpacity = 0)
 
-no.filters <- trilateration.TestData.NoFilter(combined.data)
+no.filters <- trilateration.TestData.NoFilter(combined_data)
 RSS.FILTER <- c(-80, -85, -90, -95)
-RSS.filters <- trilateration.TestData.RSS.Filter(combined.data, RSS.FILTER)
+RSS.filters <- trilateration.TestData.RSS.Filter(combined_data, RSS.FILTER)
 #DIST.FILTER <- c(315,500,750,1000)
 # Calculate error of location estimates of each test location when Distance filters are applied prior to trilateration 
-#Dist.filters <- trilateration.TestData.Distance.Filter(combined.data, DIST.FILTER)
+#Dist.filters <- trilateration.TestData.Distance.Filter(combined_data, DIST.FILTER)
 
 SLIDE.TIME <- 2
 GROUP.TIME <- "1 min"
