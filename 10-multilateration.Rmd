@@ -29,12 +29,14 @@ options(digits=9)
 
 ### 10.1.2 Load functions
 ```{r}
+library(data.table)
 source("R/Functions_Paxton-CTTUpdate.R")
 ```
 
 ### 10.1.3 Re-create sample data for calibration
 ```{r}
 #create time window by reducing location precision or can input data with TestId column (user-defined window)
+# where does calibration file come from?
 mytest <- read.csv("./calibration_2023_8_3_all.csv")
 mytest$Time <- as.POSIXct(mytest$time_utc, tz="UTC")
 
@@ -43,7 +45,7 @@ con <- DBI::dbConnect(duckdb::duckdb(),
                       dbdir = "./data/meadows/meadows.duckdb", 
                       read_only = TRUE)
 
-# filter for specific dates
+# filter for specific dates and for the specified tags in tagid
 testdata <- tbl(con, "raw") |> 
   filter(time >= as.Date("2023-07-31") && time <= as.Date("2023-10-31")) |>
   filter(tag_id %in% tagid) |>
@@ -89,6 +91,7 @@ ggplot(data = combined_data,
            color = node_id)) +
   geom_point(size = 2)
 ```
+As distance increases, we see average RSS decreasing exponentially.
 
 ### 10.3.1 Preliminary Exponential Decay Model - Determine staring values for the final model
 
