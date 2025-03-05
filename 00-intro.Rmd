@@ -5,3 +5,16 @@ This RMarkdown document goes over the files, functions, and analyses from the 20
 This document will serve as a tutorial on how Cellular Tracking Technologies (CTT) registered users can download their data from our server, and visualize the data using the built-in package functions.
 
 This tutorial provides step-by-step instructions on how to obtain your data. This style is used for absolute beginners in R, SQL, and data science.
+
+## Installing another package with dependencies...
+```{bash}
+sudo apt installlibpq-dev libssl-dev
+sudo apt install libpq-dev libssl-dev
+```
+
+## Installing R Spatial on Ubuntu
+```{bash}
+sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+sudo apt update
+sudo apt install libgdal-dev libgeos-dev libproj-dev libtbb-dev
+```
