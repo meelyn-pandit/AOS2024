@@ -55,14 +55,16 @@ create_outpath(outpath)
 
 # Connect to Database using DuckDB -----------------------------------------------------
 con <- DBI::dbConnect(duckdb::duckdb(), 
-                      dbdir = "./data/meadows/meadows2.duckdb", 
+                      dbdir = "./data/meadows/meadows2.db", 
                       read_only = FALSE)
 ```
 
 
 ## 2.2 Download data from the CTT API
 
-You are now connected to your DuckDB database, but so far nothing is in the database. The script below will download and insert the files into your local database.
+You are now connected to your DuckDB database, but so far nothing is in the database. The script below will download your data from the CTT servers and insert the files into your local database.
+
+NOTE! Your Sensor Station must be set to upload data to our servers. If your station does not upload data, skip this block and go to section 2.2.1.
 ```{r eval=FALSE}
 get_my_data(my_token,
             outpath, 
@@ -77,17 +79,12 @@ get_my_data(my_token,
 ### 2.2.1 Create Database from Files on your Computer
 If you already have your Sensor Station files on your computer (i.e. your sensor station is not connected to the internet), you can use the code block below to create a database and add those files to it.
 ```{r}
-source('./R/functions/utils/create_databases.R')
-create_duck(con)
-update_db(con,
-          outpath,
-          myproject)
+celltracktech::create_duck(con)
 ```
 
 ## 2.3 Updating the database
 
-You have downloaded the compressed data (i.e. the '.csv.gz' files), now you will need to insert them into your DuckDB database:
-
+Upload the compressed data (i.e. the '.csv.gz' files) into your DuckDB database:
 ```{r eval=FALSE}
 update_db(con, outpath, myproject)
 ```
@@ -116,7 +113,6 @@ create_outpath('./data/meadows/Meadows V2/nodes/')
 ### 2.5.2 Create individual directories for each Node
 
 Then, create a folder for each Node. In the example below, we are creating a folder for Node 3B8845:
-
 ```{r eval=FALSE}
 create_outpath('./data/meadows/Meadows V2/nodes/3B8845/')
 ```

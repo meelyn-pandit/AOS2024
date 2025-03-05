@@ -12,6 +12,10 @@ knitr::opts_chunk$set(eval = FALSE)
 
 # 9 Grid Search Analysis
 
+If you are interested in the extent of an animal's movement, use the following grid search analysis.
+
+Like in Chapter 8 - Habitat Use, the grid search analysis divides an area into a grid, and calculates the received signal strength at each node. Then this process is repeated for each time step in a series of detections recorded by the node network.
+
 ## 9.1 Loading Settings
 
 ### 9.1.1 Activate renv
@@ -20,7 +24,6 @@ renv::activate()
 ```
 
 ### 9.1.2 Load libraries
-
 ```{r}
 library(dplyr)
 library(duckdb)

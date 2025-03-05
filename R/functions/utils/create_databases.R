@@ -36,9 +36,11 @@ create_db <- function(conn) {
         ON UPDATE NO ACTION
   )")
   
-  DBI::dbExecute(conn, "CREATE TABLE IF NOT EXISTS raw
+  DBI::dbExecute(conn, "
+  CREATE SEQUENCE IF NOT EXISTS seq_id START 1;
+  CREATE TABLE IF NOT EXISTS raw
   (
-    id	SERIAL PRIMARY KEY,
+    id integer primary key default nextval('seq_id'),
     path  TEXT NOT NULL,
     radio_id smallint NOT NULL,
     tag_id TEXT,
@@ -49,9 +51,11 @@ create_db <- function(conn) {
     station_id TEXT
   )")
   
-  DBI::dbExecute(conn, "CREATE TABLE IF NOT EXISTS blu
+  DBI::dbExecute(conn, "
+  CREATE SEQUENCE IF NOT EXISTS seq_idb START 1;
+  CREATE TABLE IF NOT EXISTS blu
   (
-    id	SERIAL PRIMARY KEY,
+    id integer primary key default nextval('seq_idb'),
     path  TEXT NOT NULL,
     radio_id smallint,
     usb_port smallint,
@@ -108,6 +112,15 @@ create_db <- function(conn) {
   )")
 }
 
+#' Title
+#'
+#' @param conn name of the database, must end in .duckdb
+#'
+#' @returns duckdb database
+#' @export
+#'
+#' @examples
+#' create_duck(conn)
 create_duck <- function(conn) {
   DBI::dbExecute(conn, "CREATE TABLE IF NOT EXISTS ctt_project
   (

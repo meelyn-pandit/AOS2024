@@ -11,6 +11,11 @@ knitr::opts_chunk$set(eval = FALSE)
 ```
 
 # 10 Multilateration
+This process is just like habitat use and grid search analysis, but instead of using the RSSI, it uses time difference of arrival instead to calculate the location of an animal.
+
+Best to use when your node grid is evenly spaced.
+
+[Multilateration paper](https://pubmed.ncbi.nlm.nih.gov/35169450/)
 
 ## 10.1 Load settings
 
