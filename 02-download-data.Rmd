@@ -55,7 +55,7 @@ create_outpath(outpath)
 
 # Connect to Database using DuckDB -----------------------------------------------------
 con <- DBI::dbConnect(duckdb::duckdb(), 
-                      dbdir = "./data/meadows/meadows.duckdb", 
+                      dbdir = "./data/meadows/meadows2.duckdb", 
                       read_only = FALSE)
 ```
 
@@ -72,6 +72,16 @@ get_my_data(my_token,
             end=as.Date("2023-12-31"),
             filetypes=c("raw", "node_health")
 )
+```
+
+### 2.2.1 Create Database from Files on your Computer
+If you already have your Sensor Station files on your computer (i.e. your sensor station is not connected to the internet), you can use the code block below to create a database and add those files to it.
+```{r}
+source('./R/functions/utils/create_databases.R')
+create_duck(con)
+update_db(con,
+          outpath,
+          myproject)
 ```
 
 ## 2.3 Updating the database

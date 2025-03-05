@@ -26,7 +26,7 @@ Remember to reconnect to the database!
 library(celltracktech)
 
 con <- DBI::dbConnect(duckdb::duckdb(), 
-                      dbdir = "./data/meadows/meadows.duckdb", 
+                      dbdir = "./data/meadows/meadows2.duckdb", 
                       read_only = FALSE)
 
 # list tables in database
