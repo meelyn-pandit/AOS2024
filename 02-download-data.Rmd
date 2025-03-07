@@ -76,6 +76,14 @@ get_my_data(my_token,
 )
 ```
 
+You may get this error message:
+
+```{r}
+Error in post(endpoint = endpoint, payload = payload) : 
+  Gateway Timeout (HTTP 504).
+```
+It is fine, just run the `get_my_data()` function again and it should work properly.
+
 ### 2.2.1 Create Database from Files on your Computer
 If you already have your Sensor Station files on your computer (i.e. your sensor station is not connected to the internet), you can use the code block below to create a database and add those files to it.
 ```{r}
