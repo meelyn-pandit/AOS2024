@@ -125,6 +125,8 @@ Then, create a folder for each Node. In the example below, we are creating a fol
 create_outpath('./data/meadows/Meadows V2/nodes/3B8845/')
 ```
 
+In each node folder, place its respective csv files from the SD card. **DO NOT** change the file name.
+
 ### 2.5.3 Upload Node data to your DuckDB database
 
 Remember, we need to re-connect to the DuckDB database to upload the Node data:

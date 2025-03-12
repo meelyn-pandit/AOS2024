@@ -44,31 +44,31 @@ con <- DBI::dbConnect(duckdb::duckdb(),
                       dbdir = "./data/meadows/meadows.duckdb", 
                       read_only = FALSE)
 
-# list last 10 records in raw
-raw = DBI::dbGetQuery(con, "SELECT * FROM raw "); raw
-tail(raw)
+# list first 10 records in raw
+raw = DBI::dbGetQuery(con, "SELECT * FROM raw ")
+head(raw)
 
-# list last 10 records in blu
-blu = DBI::dbGetQuery(con, "SELECT * FROM blu "); blu
-tail(blu)
+# list first 10 records in blu
+blu = DBI::dbGetQuery(con, "SELECT * FROM blu ")
 head(blu)
 
+#list first 10 records in gps table
+gps = DBI::dbGetQuery(con, 'SELECT * FROM gps')
+head(gps)
+
+# list first 10 records in node_health table
+node_health = DBI::dbGetQuery(con, 'SELECT * FROM node_health')
+
 # list the number of unique nodes in your project
-node_table = DBI::dbGetQuery(con, 'SELECT * FROM nodes')
-head(node_table)
+unique_nodes = DBI::dbGetQuery(con, 'SELECT * FROM nodes')
+head(unique_nodes)
 
 # list the data files that were used to create your database
 df_table = DBI::dbGetQuery(con, 'SELECT * FROM data_file')
 
+# disconnect from database
 DBI::dbDisconnect(con)
 
 ```
-Find unique tags
-```{r}
-unique_tags = raw %>%
-  group_by(tag_id) %>%
-  summarize(num_detect = n()) %>%
-  select(tag_id, num_detect) %>%
-  arrange(desc(num_detect))
-```
+
 Note: you do not need to load each table into RStudio. You should only load the tables you need to for your analysis.

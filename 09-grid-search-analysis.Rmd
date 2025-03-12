@@ -37,7 +37,7 @@ library(ggplot2)
 source("R/defs/plot_themes.R")
 # UTILS
 source("R/functions/utils/get_time_value.R")
-# NDOE
+# NODE
 source("R/functions/node/node_functions.R")
 # TAG
 source("R/functions/tag/load_node_detection_data.R")
@@ -64,23 +64,34 @@ a <- -103.0610446987
 b <- -60.6023833206
 c <- 0.0120558164
 rssi_coefs <- c(a, b, c)
+```
 
-# Specify the time range of node data you want to import for this analysis
-#   This range should cover a large time window where your nodes were in
-#   a constant location.  All node health records in this time window
-#   will be used to accurately determine the position of your nodes
+
+Specify the time range of node data you want to import for this analysis. This range should cover a large time window where your nodes were in a constant location.
+
+All node health records in this time window will be used to accurately determine the position of your nodes
+
+```{r}
+# Specify start and stop times for the nodes
 node_start_time <- as.POSIXct("2023-08-01 00:00:00", tz = "GMT")
 node_stop_time <- as.POSIXct("2023-08-07 00:00:00", tz = "GMT")
 
-# Specify time range of detection data you want to pull from the DB
+# Specify time range of detection data you want to pull from the raw and/or blu data tables
 det_start_time <- as.POSIXct("2023-08-03 00:00:00", tz = "GMT")
 det_stop_time <- as.POSIXct("2023-08-04 00:00:00", tz = "GMT")
+```
 
-# Specify a list of node Ids if you only want to include a subset in calibration
-# IF you want to use all nodes, ignore this line and SKIP the step below
+
+Specify a list of node Ids if you only want to include a subset in calibration
+
+IF you want to use all nodes, ignore this line and SKIP the step below
+```{r}
 # where the data frame is trimmed to only nodes in this list
-# my_nodes <- c("B25AC19E", "44F8E426", "FAB6E12", "1EE02113", "565AA5B9", "EE799439", "1E762CF3", "A837A3F4", "484ED33B")
+my_nodes <- c("B25AC19E", "44F8E426", "FAB6E12", "1EE02113", "565AA5B9", "EE799439", "1E762CF3", "A837A3F4", "484ED33B")
+```
 
+#### 9.1.4.1 Load node map
+```{r}
 # You can specify an alternative map tile URL to use here
 my_tile_url <- "https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
 ```
@@ -99,13 +110,16 @@ DBI::dbDisconnect(con)
 ```{r}
 # Calculate the average node locations
 node_locs <- calculate_node_locations(node_health_df)
+
 # Plot the average node locations
 node_loc_plot <- plot_node_locations(node_health_df,
                                      node_locs,
                                      theme = classic_plot_theme)
 node_loc_plot
+
 # Write the node locations to a file
 export_node_locations("examples/meadows/output/node_locations.csv", node_locs)
+
 # Draw a map with the node locations
 node_map <- map_node_locations(node_locs, tile_url = my_tile_url)
 node_map
@@ -114,11 +128,15 @@ node_map
 ## 9.4 Load Station Detection Data
 ```{r}
 # Load from DB
-con <- DBI::dbConnect(duckdb::duckdb(), dbdir = database_file, read_only = TRUE)
+con <- DBI::dbConnect(duckdb::duckdb(),
+dbdir = database_file,
+ read_only = TRUE)
+
 detection_df <- tbl(con, "raw") |>
   filter(time >= det_start_time & time <= det_stop_time) |>
   filter(tag_id == my_tag_id) |>
   collect()
+
 DBI::dbDisconnect(con)
 detection_df <- detection_df %>% mutate(time_value = as.integer(time))
 ```
@@ -130,6 +148,7 @@ grid_center_lon <- -74.9462
 grid_size_x <- 500 # meters
 grid_size_y <- 800 # meters
 grid_bin_size <- 5 # meters
+
 # Create a data frame with the details about the grid
 grid_df <- build_grid(
   node_locs = node_locs,
@@ -167,9 +186,14 @@ solution <- subset(test_grid_values, test_grid_values$value == max(test_grid_val
 print(solution)
 
 # Multilateration calculation
-reduced_rec_df <- subset.data.frame(test_rec_df, test_rec_df$filtered_rssi >= a)
+reduced_rec_df <- subset.data.frame(test_rec_df, 
+                                    test_rec_df$filtered_rssi >= a)
+
 node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
-multilat_fit <- nls(reduced_rec_df$exp_dist ~ haversine(reduced_rec_df$lat,reduced_rec_df$lon,ml_lat,ml_lon),
+
+multilat_fit <- nls(reduced_rec_df$exp_dist ~ haversine(reduced_rec_df$lat,
+                                                        reduced_rec_df$lon,
+                                                        ml_lat,ml_lon),
                       reduced_rec_df,
                       start= list(ml_lat = node_w_max$lat, ml_lon = node_w_max$lon),
                       control=nls.control(warnOnly = T, minFactor=1/65536, maxiter = 100)

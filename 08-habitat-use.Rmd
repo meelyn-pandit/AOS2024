@@ -35,7 +35,7 @@ library(celltracktech)
 source("R/defs/plot_themes.R")
 # TAG
 source("R/functions/tag/load_node_detection_data.R")
-# NDOE
+# NODE
 source("R/functions/node/node_functions.R")
 # GRID SEARCH
 source("R/functions/grid_search/grid_search_functions.R")
