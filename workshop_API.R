@@ -1,6 +1,8 @@
 library(devtools)
-install_github('cellular-tracking-technologies/celltracktech')
-
+# install_github('cellular-tracking-technologies/celltracktech',
+#                ref = 'dev')
+renv::install('cellular-tracking-technologies/celltracktech',
+              ref = 'dev')
 library(celltracktech)
 library(duckdb) # added to package, need to re-install
 library(dotenv)
@@ -22,13 +24,7 @@ myproject <- "Meadows V2" #this is your project name on your CTT account
 outpath <- "./data/meadows/" #where your downloaded files are to go
 
 # Create outpath folder if it does not exist
-if (file.exists(outpath)) {
-  print(paste('Folder exists, no need to create a new directory.'))
-} else {
-  # create a new sub directory inside the main path
-  print(paste('Folder', outpath, 'does not exist, creating it now.'))
-  dir.create(outpath)
-}
+create_outpath(outpath)
 
 
 # Connect to Database using DuckDB -----------------------------------------------------
@@ -41,8 +37,8 @@ get_my_data(my_token,
             outpath, 
             con, 
             myproject=myproject, 
-            begin=as.Date("2023-08-01"), 
-            end=as.Date("2023-08-02"), 
+            begin=as.Date("2023-08-03"), 
+            end=as.Date("2023-08-04"), 
             filetypes=c("raw", "node_health")
 )
 
@@ -62,3 +58,38 @@ DBI::dbDisconnect(con)
 
 time_elapse <- Sys.time() - start
 print(time_elapse)
+
+# SQL queries -------------------------------------------------------------
+
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      dbdir = "./data/btfi.duckdb", 
+                      read_only = FALSE)
+
+# list tables in database
+DBI::dbListTables(con)
+
+# list last 10 records in raw
+raw = DBI::dbGetQuery(con, "SELECT * FROM raw ")
+head(raw)
+
+# list first 10 records in blu
+blu = DBI::dbGetQuery(con, "SELECT * FROM blu ")
+head(blu)
+
+# list first 10 records in gps
+gps = DBI::dbGetQuery(con, "SELECT * FROM gps ")
+head(gps)
+
+# list first 10 records in node_health
+node_health = DBI::dbGetQuery(con, 'SELECT * FROM node_health')
+head(node_health)
+
+# list the number of unique nodes in your project
+node_table = DBI::dbGetQuery(con, 'SELECT * FROM nodes')
+head(node_table)
+
+# list the data files that were used to create your database
+df_table = DBI::dbGetQuery(con, 'SELECT * FROM data_file')
+
+DBI::dbDisconnect(con)
+

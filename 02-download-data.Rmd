@@ -129,6 +129,8 @@ create_outpath('./data/meadows/Meadows V2/nodes/3B8845/')
 
 Remember, we need to re-connect to the DuckDB database to upload the Node data:
 ```{r eval=FALSE}
+outpath <- "./data/meadows/" # where your downloaded files are to go
+
 con <- DBI::dbConnect(duckdb::duckdb(), 
                       dbdir = "./data/meadows/meadows.duckdb", 
                       read_only = FALSE)
