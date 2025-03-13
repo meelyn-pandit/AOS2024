@@ -1,10 +1,23 @@
 # AOS2024 - 'celltracktech' Workshop
 
-This RMarkdown document goes over the files, functions, and analyses from the 2024 American Ornithological Society (AOS) Workshop in Estes Park, CO on the 'celltracktech' R package. This package was developed by Dr. Jessica Gorzo and Sean Burcher.
+This RMarkdown document goes over the files, functions, and analyses from the 2024 American Ornithological Society (AOS) Workshop in Estes Park, CO on the 'celltracktech' R package. This package was developed by Dr. Jessica Gorzo and Dr. Sean Burcher to analyze movement data collected by Cellular Tracking Technologies (CTT) devices.
 
-This document will serve as a tutorial on how Cellular Tracking Technologies (CTT) registered users can download their data from our server, and visualize the data using the built-in package functions.
+This document will serve as a tutorial on how CTT registered users can download their data from our server, upload their data to a local SQL-based database, and visualize the data using the built-in package functions.
 
 This tutorial provides step-by-step instructions on how to obtain your data. This style is used for absolute beginners in R, SQL, and data science.
+
+Some basics to go over:
+
+The './' represents the current folder or directory you are in. You can find this folder by running the `getwd()` command in the R console.
+
+The '../' represents the parent folder of your current folder. For example if your R project has the following file tree:
+
+Documents/
+|__r_project/
+
+The 'Documents' folder is the parent folder
+
+Create your RStudio project **OUTSIDE** of your OneDrive/Google Drive folder. We will be downloading many large files that will take a long time to upload to these cloud services.
 
 ## Installing another package with dependencies...
 ```{bash}

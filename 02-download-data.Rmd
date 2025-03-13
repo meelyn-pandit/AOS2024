@@ -55,7 +55,7 @@ create_outpath(outpath)
 
 # Connect to Database using DuckDB -----------------------------------------------------
 con <- DBI::dbConnect(duckdb::duckdb(), 
-                      dbdir = "./data/meadows/meadows2.db", 
+                      dbdir = "./data/meadows/meadows.db", 
                       read_only = FALSE)
 ```
 
@@ -78,7 +78,7 @@ get_my_data(my_token,
 
 You may get this error message:
 
-```{r}
+```{bash}
 Error in post(endpoint = endpoint, payload = payload) : 
   Gateway Timeout (HTTP 504).
 ```
@@ -118,11 +118,11 @@ To upload Node data from the SD cards, you will need to create a 'nodes' folder 
 create_outpath('./data/meadows/Meadows V2/nodes/')
 ```
 
-### 2.5.2 Create individual directories for each Node
+### 2.5.2 Create individual directories for each date and each Node
 
-Then, create a folder for each Node. In the example below, we are creating a folder for Node 3B8845:
+If you upload data only from the Node SD cards, you will need to create a folder for each date that you upload the data. Nodes will save data as 434_beep0.csv, 434_beep1.csv, 434_beep2.csv, etc. If you pull the files from the SD card, the node will start the file numbering process over again. In order to prevent the files from being saved over each other, on your computer, you should store them in folders named after the date you pulled them from the node. Then, create a folder for each Node. In the example below, we are creating a folder for Node 3B8845 for the data pulled on 2025-03-12:
 ```{r eval=FALSE}
-create_outpath('./data/meadows/Meadows V2/nodes/3B8845/')
+create_outpath('./data/meadows/Meadows V2/nodes/20250312/3B8845/')
 ```
 
 In each node folder, place its respective csv files from the SD card. **DO NOT** change the file name.

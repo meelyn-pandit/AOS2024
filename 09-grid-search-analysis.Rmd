@@ -100,9 +100,13 @@ my_tile_url <- "https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
 ```{r}
 # Load from DB
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = database_file, read_only = TRUE)
+
+# load node_health data table and subset by start and stop times
 node_health_df <- tbl(con, "node_health") |>
   filter(time >= node_start_time & time <= node_stop_time) |>
   collect()
+
+# disconnect from database
 DBI::dbDisconnect(con)
 ```
 
@@ -112,8 +116,8 @@ DBI::dbDisconnect(con)
 node_locs <- calculate_node_locations(node_health_df)
 
 # Plot the average node locations
-node_loc_plot <- plot_node_locations(node_health_df,
-                                     node_locs,
+node_loc_plot <- plot_node_locations(node_health_df = node_health_df,
+                                     node_locs = node_locs,
                                      theme = classic_plot_theme)
 node_loc_plot
 
@@ -121,7 +125,8 @@ node_loc_plot
 export_node_locations("examples/meadows/output/node_locations.csv", node_locs)
 
 # Draw a map with the node locations
-node_map <- map_node_locations(node_locs, tile_url = my_tile_url)
+node_map <- map_node_locations(node_locs = node_locs,
+                               tile_url = my_tile_url)
 node_map
 ```
 
@@ -132,17 +137,22 @@ con <- DBI::dbConnect(duckdb::duckdb(),
 dbdir = database_file,
  read_only = TRUE)
 
+# load raw beep data into RStudio and subset start and stop times
 detection_df <- tbl(con, "raw") |>
   filter(time >= det_start_time & time <= det_stop_time) |>
   filter(tag_id == my_tag_id) |>
   collect()
 
+# disconnect from database
 DBI::dbDisconnect(con)
 detection_df <- detection_df %>% mutate(time_value = as.integer(time))
 ```
 
 ## 9.5 Build a Node Grid
+
+To actually quantify the amount of habitat an animal uses, we will create a 500x800 m grid and overlay it over the map. Each grid bin will be 5x5m.
 ```{r}
+# set the grid coordinates
 grid_center_lat <- 38.93664800
 grid_center_lon <- -74.9462
 grid_size_x <- 500 # meters
@@ -158,6 +168,7 @@ grid_df <- build_grid(
   y_size_meters = grid_size_y,
   bin_size = grid_bin_size
 )
+
 # Draw all of the grid bins on a map
 grid_map <- draw_grid(node_locs, grid_df)
 grid_map
@@ -181,30 +192,40 @@ test_rec_df <- calc_receiver_values(
 print(test_rec_df)
 
 # Find the GridSearch Solution
-test_grid_values <- calc_grid_values(grid_df, test_rec_df, rssi_coefs)
-solution <- subset(test_grid_values, test_grid_values$value == max(test_grid_values$value))
+test_grid_values <- calc_grid_values(grid_df,
+                                     test_rec_df, 
+                                     rssi_coefs)
+
+solution <- subset(test_grid_values, 
+                   test_grid_values$value == max(test_grid_values$value))
 print(solution)
 
-# Multilateration calculation
+# Multilateration calculation - filter dataframe for rssi values above coefficient a
 reduced_rec_df <- subset.data.frame(test_rec_df, 
                                     test_rec_df$filtered_rssi >= a)
 
 node_w_max <- reduced_rec_df[reduced_rec_df$filtered_rssi == max(reduced_rec_df$filtered_rssi),]
 
+# run exponential decay model using a non-linear least square (nls) approach
 multilat_fit <- nls(reduced_rec_df$exp_dist ~ haversine(reduced_rec_df$lat,
                                                         reduced_rec_df$lon,
-                                                        ml_lat,ml_lon),
+                                                        ml_lat,
+                                                        ml_lon),
                       reduced_rec_df,
-                      start= list(ml_lat = node_w_max$lat, ml_lon = node_w_max$lon),
-                      control=nls.control(warnOnly = T, minFactor=1/65536, maxiter = 100)
-                    )
+                      start= list(ml_lat = node_w_max$lat, 
+                                  ml_lon = node_w_max$lon),
+                      control=nls.control(warnOnly = T,
+                                          minFactor=1/65536, 
+                                          maxiter = 100))
 print(multilat_fit)
 
 co <- coef(summary(multilat_fit))
 
 print(paste(co[1,1],co[2,1]))
 
-multilat_result <- c(co[1,1],co[2,1])
+multilat_result <- c(co[1,1],
+                     co[2,1])
+
 test_map <- draw_single_solution(test_rec_df, 
                                  test_grid_values, 
                                  solution, 
