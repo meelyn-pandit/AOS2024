@@ -84,12 +84,6 @@ Error in post(endpoint = endpoint, payload = payload) :
 ```
 It is fine, just run the `get_my_data()` function again and it should work properly.
 
-### 2.2.1 Create Database from Files on your Computer
-If you already have your Sensor Station files on your computer (i.e. your sensor station is not connected to the internet), you can use the code block below to create a database and add those files to it.
-```{r}
-celltracktech::create_duck(con)
-```
-
 ## 2.3 Updating the database
 
 Upload the compressed data (i.e. the '.csv.gz' files) into your DuckDB database:
@@ -122,7 +116,7 @@ create_outpath('./data/meadows/Meadows V2/nodes/')
 
 If you upload data only from the Node SD cards, you will need to create a folder for each date that you upload the data. Nodes will save data as 434_beep0.csv, 434_beep1.csv, 434_beep2.csv, etc. If you pull the files from the SD card, the node will start the file numbering process over again. In order to prevent the files from being saved over each other, on your computer, you should store them in folders named after the date you pulled them from the node. Then, create a folder for each Node. In the example below, we are creating a folder for Node 3B8845 for the data pulled on 2025-03-12:
 ```{r eval=FALSE}
-create_outpath('./data/meadows/Meadows V2/nodes/20250312/3B8845/')
+create_outpath('./data/meadows/Meadows V2/nodes/3B8845/')
 ```
 
 In each node folder, place its respective csv files from the SD card. **DO NOT** change the file name.
@@ -153,3 +147,72 @@ DBI::dbDisconnect(con)
 ```
 
 You have finished uploading data to your database!
+
+## 2.6 Upload data only from Nodes
+
+If your sensor station is not connected to the internet, you can still create a database and upload the data from the node SD cards directly.
+
+### 2.6.1 Create Database from Files on your Computer
+
+If you already have your Sensor Station files on your computer (i.e. your sensor station is not connected to the internet), you can use the code block below to create a database and add those files to it.
+```{r}
+outpath <- "./data/meadows/" # where your downloaded files are to go
+
+create_outpath(outpath)
+
+# set myproject
+myproject = 'Meadows V2'
+
+# set sensor station id
+sensor_station = '6CA25D375881'
+
+# create project and sensor station folder
+create_outpath(paste0(outpath, myproject, '/', sensor_station, '/'))
+
+# create nodes folder in project folder
+create_outpath(paste0(outpath, myproject, '/', 'nodes/E36785/'))
+
+con <- DBI::dbConnect(duckdb::duckdb(), 
+                      dbdir = "./data/meadows/meadows.duckdb", 
+                      read_only = FALSE)
+
+create_duck(con)
+
+```
+
+### 2.6.2 Create individual directories for each date and each Node
+
+If you upload data only from the Node SD cards, you will need to create a folder for each date that you upload the data. Nodes will save data as 434_beep0.csv, 434_beep1.csv, 434_beep2.csv, etc. If you pull the files from the SD card, the node will start the file numbering process over again. In order to prevent the files from being saved over each other, on your computer, you should store them in folders named after the date you pulled them from the node. Then, create a folder for each Node. In the example below, we are creating a folder for each node and for each date:
+
+```{r eval=FALSE}
+# Set your outpath - for you this is your desktop
+outpath <- './data/meadows/' # where your downloaded files are to go
+
+myproject = 'Meadows V2'
+
+# create dates and nodes lists
+dates = c('20240101', '20240102', '20240103')
+nodes = c('3282EC', '326710', '328FAF', '32660E', '327749', '328D0C')
+
+# create dates and nodes folder
+for(i in dates) {
+  for(j in nodes) {
+    create_outpath(paste0(outpath, myproject, '/', 'nodes/', i, '/', j))
+  }
+}
+
+# Import node data into your database
+import_node_data(d = con,
+                 outpath = outpath,
+                 myproject = myproject)
+
+# update the database
+update_db(d = con,
+          outpath = outpath,
+          myproject = myproject,
+          fix = FALSE)
+
+# disconnect from the database
+DBI::dbDisconnect(con)
+```
+```

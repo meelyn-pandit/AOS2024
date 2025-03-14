@@ -1,27 +1,29 @@
 # Install celltracktech library - dev version -----------------------------
-
-devtools::install_github('cellular-tracking-technologies/celltracktech', 
-                         ref='dev')
+library(devtools)
+devtools::install_github('cellular-tracking-technologies/celltracktech', ref='dev')
+# renv::install('cellular-tracking-technologies/celltracktech', ref='dev')
 
 # Load Libraries ----------------------------------------------------------
-library(devtools)
 library(duckdb)
 library(celltracktech)
 
-
 # Create folders ----------------------------------------------------------
 
-# Create your data folder if it does not exist
-outpath <- "./data/" # where your downloaded files are to go
+# Set your outpath - for you this is your desktop
+outpath <- "C:/Users/jd111569/OneDrive - James Cook University/Desktop/" # where your downloaded files are to go
 
-myproject = 'Black-throated Finches in Australia'
-create_outpath(outpath)
+myproject = 'Black-throated finches in Australia'
 
-# create project and sensor station folder
-create_outpath('./data/Black-throated Finches in Australia/V3023D36B0FC/')
+# create dates and nodes lists
+dates = c('20240101', '20240102', '20240103')
+nodes = c('node01', 'node02', 'node03', 'node04')
 
-# create nodes folder in project folder
-create_outpath('./data/Black-throated Finches in Australia/nodes/node5/')
+# create dates and nodes folder
+for(i in dates) {
+  for(j in nodes) {
+    create_outpath(paste0(outpath, myproject, '/', 'nodes/', i, '/', j))
+  }
+}
 
 
 # Connect to Database using DuckDB -----------------------------------------------------
@@ -60,7 +62,7 @@ raw = DBI::dbGetQuery(con, "SELECT * FROM raw ")
 head(raw)
 
 # list first 10 records in blu
-blu = DBI::dbGetQuery(con, "SELECT * FROM blu ")
+blu = DBI::dbGetQuery(con, "SELECT * FROM blu")
 head(blu)
 
 # list first 10 records in gps
